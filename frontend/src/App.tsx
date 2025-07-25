@@ -16,17 +16,34 @@ import {
   ScheduleItem,
   TakenDose,
 } from "./api";
+import { ModernNavBar } from "./components/ModernNavBar";
+import { DoseCard } from "./components/DoseCard";
+import { TimeSection } from "./components/TimeSection";
+import { StatusIndicator } from "./components/StatusIndicator";
 
 function Home() {
   const [meds, setMeds] = useState<Med[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
   const [taken, setTaken] = useState<TakenDose[]>([]);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusType, setStatusType] = useState<"success" | "warning" | "info">(
+    "success",
+  );
 
   useEffect(() => {
     fetchMeds().then(setMeds);
     fetchSchedules().then(setSchedules);
     fetchTaken().then(setTaken);
   }, []);
+
+  const showStatus = (
+    message: string,
+    type: "success" | "warning" | "info" = "success",
+  ) => {
+    setStatusMessage(message);
+    setStatusType(type);
+    setTimeout(() => setStatusMessage(null), 3000);
+  };
 
   const now = new Date();
   const horizon = new Date(now.getTime() + 24 * 60 * 60 * 1000);
@@ -62,54 +79,117 @@ function Home() {
   });
   upcoming.sort((a, b) => a.time.getTime() - b.time.getTime());
 
-  return (
-    <section>
-      <p>
-        MedWrangler helps you manage your medications easily. Track, edit, and
-        delete your medications all in one place.
-      </p>
+  // Group doses by time periods
+  const overdueDoses = upcoming.filter((u) => u.time < now);
+  const nowDoses = upcoming.filter((u) => {
+    const diffMs = u.time.getTime() - now.getTime();
+    return diffMs >= 0 && diffMs <= 15 * 60 * 1000; // Within 15 minutes
+  });
+  const todayDoses = upcoming.filter((u) => {
+    const diffMs = u.time.getTime() - now.getTime();
+    return (
+      diffMs > 15 * 60 * 1000 && u.time.toDateString() === now.toDateString()
+    );
+  });
+  const tomorrowDoses = upcoming.filter((u) => {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return u.time.toDateString() === tomorrow.toDateString();
+  });
 
-      <h2>Upcoming Doses (Next 24h)</h2>
-      <p style={{ fontStyle: "italic" }}>
-        Check the box to mark a dose as taken.
-      </p>
+  const handleDoseToggle = async (
+    scheduleId: string,
+    doseTime: string,
+    newTakenState: boolean,
+  ) => {
+    try {
+      if (newTakenState) {
+        const newEntry = await createTaken(scheduleId, doseTime);
+        setTaken([...taken, newEntry]);
+        showStatus("Dose marked as taken! 💊", "success");
+      } else {
+        const takenEntry = taken.find(
+          (t) => t.scheduleId === scheduleId && t.doseTime === doseTime,
+        );
+        if (takenEntry) {
+          await deleteTaken(takenEntry.id);
+          setTaken(taken.filter((t) => t.id !== takenEntry.id));
+          showStatus("Dose unmarked", "info");
+        }
+      }
+    } catch (error) {
+      showStatus("Failed to update dose status", "warning");
+    }
+  };
+
+  const renderDoseSection = (
+    doses: typeof upcoming,
+    isOverdue: boolean = false,
+  ) => {
+    return doses.map((u) => {
+      const takenEntry = taken.find(
+        (t) => t.scheduleId === u.scheduleId && t.doseTime === u.doseTime,
+      );
+
+      return (
+        <DoseCard
+          key={`${u.scheduleId}-${u.doseTime}`}
+          medName={u.medName}
+          time={u.time}
+          isTaken={!!takenEntry}
+          isOverdue={isOverdue}
+          onToggle={(taken) =>
+            handleDoseToggle(u.scheduleId, u.doseTime, taken)
+          }
+        />
+      );
+    });
+  };
+
+  return (
+    <section className="home-section">
+      {statusMessage && (
+        <StatusIndicator
+          type={statusType}
+          message={statusMessage}
+          onDismiss={() => setStatusMessage(null)}
+        />
+      )}
+
+      <div className="welcome-section">
+        <h2>Welcome to MedWrangler</h2>
+        <p>
+          Stay on top of your medication schedule with our easy-to-use tracking
+          system.
+        </p>
+      </div>
+
       {upcoming.length === 0 ? (
-        <p>No doses scheduled in the next 24 hours.</p>
+        <div className="empty-state">
+          <h3>No doses scheduled</h3>
+          <p>
+            Get started by <Link to="/add-med">adding medications</Link> and
+            setting up your <Link to="/schedule">dosing schedule</Link>.
+          </p>
+        </div>
       ) : (
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {upcoming.map((u) => {
-            const takenEntry = taken.find(
-              (t) => t.scheduleId === u.scheduleId && t.doseTime === u.doseTime,
-            );
-            return (
-              <li key={`${u.scheduleId}-${u.doseTime}`}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={!!takenEntry}
-                    onChange={async (e) => {
-                      if (e.target.checked) {
-                        const newEntry = await createTaken(
-                          u.scheduleId,
-                          u.doseTime,
-                        );
-                        setTaken([...taken, newEntry]);
-                      } else if (takenEntry) {
-                        await deleteTaken(takenEntry.id);
-                        setTaken(taken.filter((t) => t.id !== takenEntry.id));
-                      }
-                    }}
-                  />
-                  {u.medName} @{" "}
-                  {u.time.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </label>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="doses-container">
+          <TimeSection title="⚠️ Overdue" count={overdueDoses.length}>
+            {renderDoseSection(overdueDoses, true)}
+          </TimeSection>
+
+          <TimeSection title="🔔 Due Now" count={nowDoses.length}>
+            {renderDoseSection(nowDoses)}
+          </TimeSection>
+
+          <TimeSection title="📅 Later Today" count={todayDoses.length}>
+            {renderDoseSection(todayDoses)}
+          </TimeSection>
+
+          <TimeSection title="➡️ Tomorrow" count={tomorrowDoses.length}>
+            {renderDoseSection(tomorrowDoses)}
+          </TimeSection>
+        </div>
       )}
     </section>
   );
@@ -368,18 +448,9 @@ function Schedule() {
 export function App() {
   return (
     <BrowserRouter>
-      <header>
-        <h1>
-          <Link to="/">MedWrangler</Link>
-        </h1>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/add-med">Add Medication</Link>
-          <Link to="/schedule">Schedule</Link>
-        </nav>
-      </header>
+      <ModernNavBar />
 
-      <main style={{ padding: 20 }}>
+      <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/add-med" element={<AddMedication />} />

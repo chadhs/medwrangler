@@ -1,54 +1,421 @@
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f8fafc;
+  color: #1a202c;
+  line-height: 1.6;
 }
 
 #root {
-  padding: 16px;
+  min-height: 100vh;
 }
-input {
-  padding: 4px 8px;
-  margin-right: 4px;
-  font-size: 1rem;
+
+/* Modern Navigation Bar */
+.modern-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-button {
-  padding: 4px 8px;
-  font-size: 1rem;
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.title-link {
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.title-link:hover {
+  opacity: 0.9;
+}
+
+.modern-nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Main content */
+.main-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Home section */
+.home-section {
+  space-y: 2rem;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.welcome-section h2 {
+  color: #2d3748;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state h3 {
+  color: #4a5568;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  color: #718096;
+}
+
+.empty-state a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.empty-state a:hover {
+  text-decoration: underline;
+}
+
+/* Time sections */
+.time-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dose-count {
+  background-color: #e2e8f0;
+  color: #4a5568;
+  padding: 0.25rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dose-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+/* Dose cards */
+.dose-card {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dose-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.dose-card.taken {
+  border-color: #48bb78;
+  background-color: #f0fff4;
+}
+
+.dose-card.overdue {
+  border-color: #f56565;
+  background-color: #fff5f5;
+}
+
+.dose-info {
+  flex: 1;
+}
+
+.med-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+}
+
+.dose-time {
+  color: #718096;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dose-time.overdue-text {
+  color: #e53e3e;
+  font-weight: 600;
+}
+
+/* Dose toggle buttons */
+.dose-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+  justify-content: center;
 }
+
+.dose-toggle.taken {
+  background-color: #48bb78;
+  color: white;
+}
+
+.dose-toggle.taken:hover {
+  background-color: #38a169;
+}
+
+.dose-toggle.not-taken {
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border: 2px solid #cbd5e0;
+}
+
+.dose-toggle.not-taken:hover {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.dose-toggle.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.dose-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Status indicators */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.status-indicator.success {
+  background-color: #f0fff4;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+
+.status-indicator.warning {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fbd38d;
+}
+
+.status-indicator.info {
+  background-color: #ebf8ff;
+  color: #2c5282;
+  border: 1px solid #90cdf4;
+}
+
+.dismiss-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  opacity: 0.7;
+  padding: 0;
+  margin-left: auto;
+}
+
+.dismiss-btn:hover {
+  opacity: 1;
+}
+
+/* Form elements */
+input, select, button {
+  font-family: inherit;
+}
+
+input, select {
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+button:not(.dose-toggle):not(.dismiss-btn) {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:not(.dose-toggle):not(.dismiss-btn):hover {
+  background-color: #5a67d8;
+}
+
+button:not(.dose-toggle):not(.dismiss-btn):disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+}
+
+/* Lists */
 ul {
   list-style: none;
   padding: 0;
 }
+
 li {
-  margin: 8px 0;
+  margin: 0.5rem 0;
 }
 
-/* Header styling */
-header {
-  background-color: #282c34;
-  color: white;
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
+th, td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-header a {
-  color: inherit;
-  text-decoration: none;
+th {
+  background-color: #f7fafc;
+  font-weight: 600;
+  color: #2d3748;
 }
 
-nav a {
-  margin-left: 16px;
-  color: #61dafb;
+tr:last-child td {
+  border-bottom: none;
 }
 
-nav a:hover {
-  text-decoration: underline;
+/* Responsive design */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .modern-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .dose-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dose-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .dose-toggle {
+    width: 100%;
+  }
 }
