@@ -3,19 +3,19 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { v4 as uuidv4 } from "uuid";
 
 const client = new DynamoDBClient({});
-const TABLE = process.env.MEDS_TABLE_NAME!;
+const TABLE = process.env.SCHEDULES_TABLE_NAME!;
 
 export const handler: APIGatewayProxyHandler = async (e) => {
-  const { name } = JSON.parse(e.body || "{}");
-  if (!name) {
-    return { statusCode: 400, body: "Missing 'name'" };
+  const { medId, frequency } = JSON.parse(e.body || "{}");
+  if (!medId || !frequency) {
+    return { statusCode: 400, body: "Missing 'medId' or 'frequency'" };
   }
   const id = uuidv4();
   await client.send(
     new PutItemCommand({
       TableName: TABLE,
-      Item: { id: { S: id }, name: { S: name } },
+      Item: { id: { S: id }, medId: { S: medId }, frequency: { S: frequency } },
     }),
   );
-  return { statusCode: 201, body: JSON.stringify({ id, name }) };
+  return { statusCode: 201, body: JSON.stringify({ id, medId, frequency }) };
 };

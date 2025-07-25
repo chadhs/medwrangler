@@ -1,8 +1,12 @@
 import { Api, Table, StackContext, StaticSite } from "sst/constructs";
 
 export function MyStack({ stack }: StackContext) {
-  // DynamoDB table
+  // DynamoDB tables
   const table = new Table(stack, "Meds", {
+    fields: { id: "string" },
+    primaryIndex: { partitionKey: "id" },
+  });
+  const scheduleTable = new Table(stack, "Schedules", {
     fields: { id: "string" },
     primaryIndex: { partitionKey: "id" },
   });
@@ -12,19 +16,29 @@ export function MyStack({ stack }: StackContext) {
     defaults: {
       function: {
         runtime: "nodejs18.x",
-        environment: { TABLE_NAME: table.tableName },
+        environment: {
+          MEDS_TABLE_NAME: table.tableName,
+          SCHEDULES_TABLE_NAME: scheduleTable.tableName,
+        },
       },
     },
     routes: {
+      // Medications
       "GET    /meds": "src/functions/getMeds.handler",
       "POST   /meds": "src/functions/createMed.handler",
       "PUT    /meds/{id}": "src/functions/updateMed.handler",
       "DELETE /meds/{id}": "src/functions/deleteMed.handler",
+
+      // Schedules
+      "GET    /schedules": "src/functions/getSchedules.handler",
+      "POST   /schedules": "src/functions/createSchedule.handler",
+      "PUT    /schedules/{id}": "src/functions/updateSchedule.handler",
+      "DELETE /schedules/{id}": "src/functions/deleteSchedule.handler",
     },
   });
 
-  // Grant all functions full access to the table
-  api.attachPermissions([table]);
+  // Grant all functions full access to the tables
+  api.attachPermissions([table, scheduleTable]);
 
   const site = new StaticSite(stack, "Frontend", {
     path: "../frontend", // relative to your backend folder

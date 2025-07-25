@@ -3,7 +3,7 @@ import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
 
 const client = new DynamoDBClient({});
-const TABLE = process.env.MEDS_TABLE_NAME!;
+const TABLE = process.env.SCHEDULES_TABLE_NAME!;
 
 export const handler: APIGatewayProxyHandler = async () => {
   const resp = await client.send(new ScanCommand({ TableName: TABLE }));
