@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import { fetchMeds, createMed, updateMed, deleteMed, Med } from "./api";
 
-export function App() {
-  const [meds, setMeds] = useState<Med[]>([]);
+function Home() {
+  return (
+    <section>
+      <p>
+        MedWrangler helps you manage your medications easily. Track, edit, and
+        delete your medications all in one place.
+      </p>
+    </section>
+  );
+}
+
+function AddMedication() {
   const [text, setText] = useState("");
+  const [meds, setMeds] = useState<Med[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
 
@@ -30,14 +42,19 @@ export function App() {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h1>MedWrangler</h1>
-      <input
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="New med"
-      />
-      <button onClick={add}>Add</button>
+    <section>
+      <h2>Add Medication</h2>
+
+      <div>
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="New medication name"
+        />
+        <button onClick={add}>Add</button>
+      </div>
+
+      <h2>Your Medications</h2>
       <ul>
         {meds.map((m) => (
           <li key={m.id}>
@@ -67,6 +84,29 @@ export function App() {
           </li>
         ))}
       </ul>
-    </div>
+    </section>
+  );
+}
+
+export function App() {
+  return (
+    <BrowserRouter>
+      <header>
+        <h1>
+          <Link to="/">MedWrangler</Link>
+        </h1>
+        <nav>
+          <Link to="/">Home</Link>
+          <Link to="/add-med">Add Medication</Link>
+        </nav>
+      </header>
+
+      <main style={{ padding: 20 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/add-med" element={<AddMedication />} />
+        </Routes>
+      </main>
+    </BrowserRouter>
   );
 }
