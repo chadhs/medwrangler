@@ -7,6 +7,6 @@ const TABLE = process.env.TABLE_NAME!;
 
 export const handler: APIGatewayProxyHandler = async () => {
   const resp = await client.send(new ScanCommand({ TableName: TABLE }));
-  const items = resp.Items?.map(i => unmarshall(i)) || [];
+  const items = resp.Items?.map((i) => unmarshall(i)) || [];
   return { statusCode: 200, body: JSON.stringify(items) };
 };

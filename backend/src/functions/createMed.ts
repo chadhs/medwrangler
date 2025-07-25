@@ -14,8 +14,8 @@ export const handler: APIGatewayProxyHandler = async (e) => {
   await client.send(
     new PutItemCommand({
       TableName: TABLE,
-      Item: { id: { S: id }, name: { S: name } }
-    })
+      Item: { id: { S: id }, name: { S: name } },
+    }),
   );
   return { statusCode: 201, body: JSON.stringify({ id, name }) };
 };
