@@ -38,7 +38,9 @@ export const deleteMed = async (id: string): Promise<void> => {
 export interface ScheduleItem {
   id: string;
   medId: string;
-  frequency: string;
+  frequency: number;
+  startTime: string;
+  days: number[];
 }
 
 export const fetchSchedules = async (): Promise<ScheduleItem[]> => {
@@ -49,12 +51,13 @@ export const fetchSchedules = async (): Promise<ScheduleItem[]> => {
 
 export const createSchedule = async (
   medId: string,
-  frequency: string,
+  frequency: number,
+  days: number[],
 ): Promise<ScheduleItem> => {
   const r = await fetch(`${API}/schedules`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ medId, frequency }),
+    body: JSON.stringify({ medId, frequency, days }),
   });
   if (!r.ok) throw new Error("Create schedule failed");
   return r.json();
@@ -63,12 +66,13 @@ export const createSchedule = async (
 export const updateSchedule = async (
   id: string,
   medId: string,
-  frequency: string,
+  frequency: number,
+  days: number[],
 ): Promise<ScheduleItem> => {
   const r = await fetch(`${API}/schedules/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ medId, frequency }),
+    body: JSON.stringify({ medId, frequency, days }),
   });
   if (!r.ok) throw new Error("Update schedule failed");
   return r.json();

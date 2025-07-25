@@ -13,12 +13,61 @@ import {
 } from "./api";
 
 function Home() {
+  const [meds, setMeds] = useState<Med[]>([]);
+  const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+
+  useEffect(() => {
+    fetchMeds().then(setMeds);
+    fetchSchedules().then(setSchedules);
+  }, []);
+
+  const now = new Date();
+  const horizon = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+  const upcoming: { medName: string; time: Date }[] = [];
+
+  schedules.forEach((s) => {
+    const med = meds.find((m) => m.id === s.medId);
+    if (!med) return;
+    const freqMs = s.frequency * 60 * 60 * 1000;
+    let t = new Date(s.startTime);
+    if (t < now) {
+      const diff = now.getTime() - t.getTime();
+      const skips = Math.floor(diff / freqMs);
+      t = new Date(t.getTime() + skips * freqMs);
+      if (t < now) {
+        t = new Date(t.getTime() + freqMs);
+      }
+    }
+    while (t <= horizon) {
+      upcoming.push({ medName: med.name, time: new Date(t) });
+      t = new Date(t.getTime() + freqMs);
+    }
+  });
+  upcoming.sort((a, b) => a.time.getTime() - b.time.getTime());
+
   return (
     <section>
       <p>
         MedWrangler helps you manage your medications easily. Track, edit, and
         delete your medications all in one place.
       </p>
+
+      <h2>Upcoming Doses (Next 24h)</h2>
+      {upcoming.length === 0 ? (
+        <p>No doses scheduled in the next 24 hours.</p>
+      ) : (
+        <ul>
+          {upcoming.map((u) => (
+            <li key={`${u.medName}-${u.time.toISOString()}`}>
+              {u.medName} @{" "}
+              {u.time.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }
@@ -102,7 +151,8 @@ function Schedule() {
   const [meds, setMeds] = useState<Med[]>([]);
   const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
   const [selectedMedId, setSelectedMedId] = useState<string>("");
-  const [frequency, setFrequency] = useState<string>("");
+  const [frequency, setFrequency] = useState<number>(8);
+  const [days, setDays] = useState<number[]>([]);
 
   useEffect(() => {
     fetchMeds().then(setMeds);
@@ -110,11 +160,12 @@ function Schedule() {
   }, []);
 
   const addScheduleItem = async () => {
-    if (!selectedMedId || !frequency) return;
-    const item = await createSchedule(selectedMedId, frequency);
+    if (!selectedMedId || frequency <= 0 || days.length === 0) return;
+    const item = await createSchedule(selectedMedId, frequency, days);
     setScheduleItems([...scheduleItems, item]);
     setSelectedMedId("");
-    setFrequency("");
+    setFrequency(0);
+    setDays([]);
   };
 
   return (
@@ -122,57 +173,109 @@ function Schedule() {
       <h2>Schedule</h2>
 
       <div>
-        <label>
-          Medication:
-          <select
-            value={selectedMedId}
-            onChange={(e) => setSelectedMedId(e.target.value)}
-          >
-            <option value="">-- Select --</option>
-            {meds.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.name}
-              </option>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <label>
+            Medication:
+            <select
+              value={selectedMedId}
+              onChange={(e) => setSelectedMedId(e.target.value)}
+            >
+              <option value="">-- Select --</option>
+              {meds.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Frequency:
+            <select
+              value={frequency}
+              onChange={(e) => setFrequency(Number(e.target.value))}
+            >
+              <option value="">-- Select --</option>
+              {[4, 6, 8, 12, 24].map((f) => (
+                <option key={f} value={f}>
+                  Every {f}h
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div>
+            Days:
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d, idx) => (
+              <label key={d} style={{ marginLeft: 8 }}>
+                <input
+                  type="checkbox"
+                  value={idx}
+                  checked={days.includes(idx)}
+                  onChange={() => {
+                    setDays(
+                      days.includes(idx)
+                        ? days.filter((x) => x !== idx)
+                        : [...days, idx],
+                    );
+                  }}
+                />
+                {d}
+              </label>
             ))}
-          </select>
-        </label>
-        <label style={{ marginLeft: 16 }}>
-          Frequency:
-          <input
-            type="text"
-            value={frequency}
-            placeholder="e.g., every 8 hours"
-            onChange={(e) => setFrequency(e.target.value)}
-          />
-        </label>
-        <button onClick={addScheduleItem} style={{ marginLeft: 16 }}>
-          Add Schedule
-        </button>
+          </div>
+
+          <button onClick={addScheduleItem}>Add Schedule</button>
+        </div>
       </div>
 
       {scheduleItems.length > 0 && (
         <>
           <h3>Your Schedule</h3>
-          <ul>
-            {scheduleItems.map((item) => {
-              const med = meds.find((m) => m.id === item.medId);
-              return (
-                <li key={item.id}>
-                  {med?.name || item.medId}: {item.frequency}{" "}
-                  <button
-                    onClick={async () => {
-                      await deleteSchedule(item.id);
-                      setScheduleItems(
-                        scheduleItems.filter((i) => i.id !== item.id),
-                      );
-                    }}
-                  >
-                    Delete
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Medication</th>
+                <th>Frequency</th>
+                <th>Days</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scheduleItems.map((item) => {
+                const med = meds.find((m) => m.id === item.medId);
+                const dayNames = [
+                  "Sun",
+                  "Mon",
+                  "Tue",
+                  "Wed",
+                  "Thu",
+                  "Fri",
+                  "Sat",
+                ];
+                const daysList = item.days.map((d) => dayNames[d]).join(", ");
+                return (
+                  <tr key={item.id}>
+                    <td>{med?.name || item.medId}</td>
+                    <td>Every {item.frequency}h</td>
+                    <td>{daysList}</td>
+                    <td>
+                      <button
+                        onClick={async () => {
+                          await deleteSchedule(item.id);
+                          setScheduleItems(
+                            scheduleItems.filter((i) => i.id !== item.id),
+                          );
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </>
       )}
     </section>
