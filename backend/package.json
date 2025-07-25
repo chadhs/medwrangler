@@ -5,8 +5,8 @@
   "scripts": {
     "build": "sst build",
     "test": "jest",
-    "lint": "eslint \"**/*.{js,ts}\"",
-    "lint:fix": "eslint \"**/*.{js,ts}\" --fix"
+    "lint": "eslint \"src/**/*.{js,ts}\"",
+    "lint:fix": "eslint \"src/**/*.{js,ts}\" --fix"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.380.0",
