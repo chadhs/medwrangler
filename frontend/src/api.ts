@@ -43,6 +43,13 @@ export interface ScheduleItem {
   days: number[];
 }
 
+export interface TakenDose {
+  id: string;
+  scheduleId: string;
+  doseTime: string;
+  takenAt: string;
+}
+
 export const fetchSchedules = async (): Promise<ScheduleItem[]> => {
   const r = await fetch(`${API}/schedules`);
   if (!r.ok) throw new Error("Fetch schedules failed");
@@ -81,4 +88,28 @@ export const updateSchedule = async (
 export const deleteSchedule = async (id: string): Promise<void> => {
   const r = await fetch(`${API}/schedules/${id}`, { method: "DELETE" });
   if (!r.ok) throw new Error("Delete schedule failed");
+};
+
+export const fetchTaken = async (): Promise<TakenDose[]> => {
+  const r = await fetch(`${API}/taken`);
+  if (!r.ok) throw new Error("Fetch taken failed");
+  return r.json();
+};
+
+export const createTaken = async (
+  scheduleId: string,
+  doseTime: string,
+): Promise<TakenDose> => {
+  const r = await fetch(`${API}/taken`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ scheduleId, doseTime }),
+  });
+  if (!r.ok) throw new Error("Create taken failed");
+  return r.json();
+};
+
+export const deleteTaken = async (id: string): Promise<void> => {
+  const r = await fetch(`${API}/taken/${id}`, { method: "DELETE" });
+  if (!r.ok) throw new Error("Delete taken failed");
 };

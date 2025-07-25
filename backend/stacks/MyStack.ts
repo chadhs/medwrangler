@@ -11,6 +11,12 @@ export function MyStack({ stack }: StackContext) {
     primaryIndex: { partitionKey: "id" },
   });
 
+  // Taken doses table
+  const takenTable = new Table(stack, "TakenDoses", {
+    fields: { id: "string" },
+    primaryIndex: { partitionKey: "id" },
+  });
+
   // API Gateway + Lambda
   const api = new Api(stack, "Api", {
     defaults: {
@@ -19,6 +25,7 @@ export function MyStack({ stack }: StackContext) {
         environment: {
           MEDS_TABLE_NAME: table.tableName,
           SCHEDULES_TABLE_NAME: scheduleTable.tableName,
+          TAKEN_TABLE_NAME: takenTable.tableName,
         },
       },
     },
@@ -34,11 +41,16 @@ export function MyStack({ stack }: StackContext) {
       "POST   /schedules": "src/functions/createSchedule.handler",
       "PUT    /schedules/{id}": "src/functions/updateSchedule.handler",
       "DELETE /schedules/{id}": "src/functions/deleteSchedule.handler",
+
+      // Taken doses
+      "GET    /taken": "src/functions/getTaken.handler",
+      "POST   /taken": "src/functions/createTaken.handler",
+      "DELETE /taken/{id}": "src/functions/deleteTaken.handler",
     },
   });
 
   // Grant all functions full access to the tables
-  api.attachPermissions([table, scheduleTable]);
+  api.attachPermissions([table, scheduleTable, takenTable]);
 
   const site = new StaticSite(stack, "Frontend", {
     path: "../frontend", // relative to your backend folder

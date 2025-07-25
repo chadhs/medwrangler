@@ -8,22 +8,33 @@ import {
   fetchSchedules,
   createSchedule,
   deleteSchedule,
+  fetchTaken,
+  createTaken,
+  deleteTaken,
   Med,
   ScheduleItem,
+  TakenDose,
 } from "./api";
 
 function Home() {
   const [meds, setMeds] = useState<Med[]>([]);
   const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
+  const [taken, setTaken] = useState<TakenDose[]>([]);
 
   useEffect(() => {
     fetchMeds().then(setMeds);
     fetchSchedules().then(setSchedules);
+    fetchTaken().then(setTaken);
   }, []);
 
   const now = new Date();
   const horizon = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const upcoming: { medName: string; time: Date }[] = [];
+  const upcoming: {
+    medName: string;
+    time: Date;
+    scheduleId: string;
+    doseTime: string;
+  }[] = [];
 
   schedules.forEach((s) => {
     const med = meds.find((m) => m.id === s.medId);
@@ -39,7 +50,12 @@ function Home() {
       }
     }
     while (t <= horizon) {
-      upcoming.push({ medName: med.name, time: new Date(t) });
+      upcoming.push({
+        medName: med.name,
+        time: new Date(t),
+        scheduleId: s.id,
+        doseTime: t.toISOString(),
+      });
       t = new Date(t.getTime() + freqMs);
     }
   });
@@ -56,16 +72,39 @@ function Home() {
       {upcoming.length === 0 ? (
         <p>No doses scheduled in the next 24 hours.</p>
       ) : (
-        <ul>
-          {upcoming.map((u) => (
-            <li key={`${u.medName}-${u.time.toISOString()}`}>
-              {u.medName} @{" "}
-              {u.time.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </li>
-          ))}
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {upcoming.map((u) => {
+            const takenEntry = taken.find(
+              (t) => t.scheduleId === u.scheduleId && t.doseTime === u.doseTime,
+            );
+            return (
+              <li key={`${u.scheduleId}-${u.doseTime}`}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={!!takenEntry}
+                    onChange={async (e) => {
+                      if (e.target.checked) {
+                        const newEntry = await createTaken(
+                          u.scheduleId,
+                          u.doseTime,
+                        );
+                        setTaken([...taken, newEntry]);
+                      } else if (takenEntry) {
+                        await deleteTaken(takenEntry.id);
+                        setTaken(taken.filter((t) => t.id !== takenEntry.id));
+                      }
+                    }}
+                  />
+                  {u.medName} @{" "}
+                  {u.time.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </label>
+              </li>
+            );
+          })}
         </ul>
       )}
     </section>
