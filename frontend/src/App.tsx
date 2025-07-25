@@ -7,6 +7,7 @@ import {
   deleteMed,
   fetchSchedules,
   createSchedule,
+  updateSchedule,
   deleteSchedule,
   fetchTaken,
   createTaken,
@@ -69,6 +70,9 @@ function Home() {
       </p>
 
       <h2>Upcoming Doses (Next 24h)</h2>
+      <p style={{ fontStyle: "italic" }}>
+        Check the box to mark a dose as taken.
+      </p>
       {upcoming.length === 0 ? (
         <p>No doses scheduled in the next 24 hours.</p>
       ) : (
@@ -192,6 +196,7 @@ function Schedule() {
   const [selectedMedId, setSelectedMedId] = useState<string>("");
   const [frequency, setFrequency] = useState<number>(8);
   const [days, setDays] = useState<number[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchMeds().then(setMeds);
@@ -200,10 +205,23 @@ function Schedule() {
 
   const addScheduleItem = async () => {
     if (!selectedMedId || frequency <= 0 || days.length === 0) return;
-    const item = await createSchedule(selectedMedId, frequency, days);
-    setScheduleItems([...scheduleItems, item]);
+    if (editId) {
+      const updated = await updateSchedule(
+        editId,
+        selectedMedId,
+        frequency,
+        days,
+      );
+      setScheduleItems(
+        scheduleItems.map((s) => (s.id === editId ? updated : s)),
+      );
+      setEditId(null);
+    } else {
+      const item = await createSchedule(selectedMedId, frequency, days);
+      setScheduleItems([...scheduleItems, item]);
+    }
     setSelectedMedId("");
-    setFrequency(0);
+    setFrequency(8);
     setDays([]);
   };
 
@@ -264,7 +282,22 @@ function Schedule() {
             ))}
           </div>
 
-          <button onClick={addScheduleItem}>Add Schedule</button>
+          <button onClick={addScheduleItem}>
+            {editId ? "Save Changes" : "Add Schedule"}
+          </button>
+          {editId && (
+            <button
+              onClick={() => {
+                setEditId(null);
+                setSelectedMedId("");
+                setFrequency(8);
+                setDays([]);
+              }}
+              style={{ marginLeft: 8 }}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </div>
 
@@ -306,8 +339,19 @@ function Schedule() {
                             scheduleItems.filter((i) => i.id !== item.id),
                           );
                         }}
+                        style={{ marginRight: 8 }}
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditId(item.id);
+                          setSelectedMedId(item.medId);
+                          setFrequency(item.frequency);
+                          setDays(item.days);
+                        }}
+                      >
+                        Edit
                       </button>
                     </td>
                   </tr>
