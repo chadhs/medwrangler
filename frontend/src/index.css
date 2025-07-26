@@ -225,20 +225,34 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .user-welcome {
   color: rgba(255, 255, 255, 0.9);
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .logout-section {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .user-welcome {
+    font-size: 0.8rem;
+  }
 }
 
 .logout-button {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -247,6 +261,7 @@ body {
   align-items: center;
   gap: 0.5rem;
   backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
 .logout-button:hover:not(:disabled) {
@@ -281,7 +296,31 @@ body {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 2rem;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .nav-section {
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    align-items: center;
+  }
+
+  .modern-nav {
+    justify-content: center;
+  }
 }
 
 .app-title {
@@ -302,7 +341,7 @@ body {
 
 .modern-nav {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
   align-items: center;
 }
 
