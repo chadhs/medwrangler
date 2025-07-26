@@ -190,9 +190,8 @@ This project prioritizes rapid MVP development and demonstration over production
 
 **Production upgrade path**: Implement AWS Cognito or Auth0 with proper user registration, multi-factor authentication, and role-based access control.
 
-
-## development
-### install dependencies and backend infra
+## Development
+### Install Dependencies and Backend Infra
 ```sh
 cd frontend
 npm install
@@ -201,24 +200,24 @@ npm install
 npx sst dev
 ```
 
-### configure frontend
-create a `.env.local` in the `frontend` directory and add the api url from the previous step
+### Configure Frontend
+Create a `.env.local` in the `frontend` directory and add the api url from the previous step.
 ```.env
 VITE_API_URL=https://xxxxxxxxxx.execute-api.us-east-2.amazonaws.com
 ```
 
-now run `npm run dev`
+Now run `npm run dev`
 
-you should now be able to visit http://localhost:3000
+You should now be able to visit http://localhost:3000
 
-### running tests
+### Running Tests
 ```sh
 cd backend
 npm test
 ```
 
-## production deploy
-run sst to deploy prod
+## Production Deploy
+Run sst to deploy prod.
 ```sh
 npx sst deploy --stage prod
 ```
