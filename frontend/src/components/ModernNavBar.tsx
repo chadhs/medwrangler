@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { LogoutButton } from "./LogoutButton";
 
 interface NavItem {
   path: string;
@@ -23,17 +24,21 @@ export function ModernNavBar() {
           </Link>
         </h1>
 
-        <nav className="modern-nav">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`nav-link ${location.pathname === item.path ? "active" : ""}`}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="nav-section">
+          <nav className="modern-nav">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-link ${location.pathname === item.path ? "active" : ""}`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <LogoutButton />
+        </div>
       </div>
     </header>
   );

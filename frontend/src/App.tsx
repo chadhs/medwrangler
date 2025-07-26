@@ -16,10 +16,12 @@ import {
   ScheduleItem,
   TakenDose,
 } from "./api";
+import { AuthProvider } from "./contexts/AuthContext";
 import { ModernNavBar } from "./components/ModernNavBar";
 import { DoseCard } from "./components/DoseCard";
 import { TimeSection } from "./components/TimeSection";
 import { StatusIndicator } from "./components/StatusIndicator";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function Home() {
   const [meds, setMeds] = useState<Med[]>([]);
@@ -447,16 +449,20 @@ function Schedule() {
 
 export function App() {
   return (
-    <BrowserRouter>
-      <ModernNavBar />
+    <AuthProvider>
+      <BrowserRouter>
+        <ProtectedRoute>
+          <ModernNavBar />
 
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add-med" element={<AddMedication />} />
-          <Route path="/schedule" element={<Schedule />} />
-        </Routes>
-      </main>
-    </BrowserRouter>
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/add-med" element={<AddMedication />} />
+              <Route path="/schedule" element={<Schedule />} />
+            </Routes>
+          </main>
+        </ProtectedRoute>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
