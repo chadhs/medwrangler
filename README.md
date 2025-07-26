@@ -211,6 +211,12 @@ now run `npm run dev`
 
 you should now be able to visit http://localhost:3000
 
+### running tests
+```sh
+cd backend
+npm test
+```
+
 ## production deploy
 run sst to deploy prod
 ```sh
