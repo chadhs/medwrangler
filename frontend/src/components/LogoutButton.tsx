@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useState } from "react";
+import { useAuth } from "../contexts/AuthContext";
 
 export function LogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -7,22 +7,20 @@ export function LogoutButton() {
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
+
     // Add a small delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
     logout();
     setIsLoggingOut(false);
   };
 
   return (
     <div className="logout-section">
-      <span className="user-welcome">
-        Welcome, {user?.name}
-      </span>
-      <button 
+      <span className="user-welcome">Welcome, {user?.name}</span>
+      <button
         onClick={handleLogout}
-        className={`logout-button ${isLoggingOut ? 'loading' : ''}`}
+        className={`logout-button ${isLoggingOut ? "loading" : ""}`}
         disabled={isLoggingOut}
       >
         {isLoggingOut ? (

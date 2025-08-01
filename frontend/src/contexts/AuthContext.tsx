@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface User {
   email: string;
@@ -9,7 +15,10 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }
 
@@ -17,12 +26,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Demo user credentials
 const DEMO_USER = {
-  email: 'demo@medwrangler.com',
-  password: 'demo123',
-  name: 'Demo User'
+  email: "demo@medwrangler.com",
+  password: "demo123",
+  name: "Demo User",
 };
 
-const AUTH_STORAGE_KEY = 'medwrangler_auth';
+const AUTH_STORAGE_KEY = "medwrangler_auth";
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -40,44 +49,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const userData = JSON.parse(savedAuth);
         setUser(userData);
       } catch (error) {
-        console.error('Failed to parse saved auth data:', error);
+        console.error("Failed to parse saved auth data:", error);
         localStorage.removeItem(AUTH_STORAGE_KEY);
       }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+  ): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    
+
     // Simulate API call delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
     try {
       // Validate against demo user credentials
-      if (email.toLowerCase() === DEMO_USER.email.toLowerCase() && password === DEMO_USER.password) {
+      if (
+        email.toLowerCase() === DEMO_USER.email.toLowerCase() &&
+        password === DEMO_USER.password
+      ) {
         const userData = {
           email: DEMO_USER.email,
-          name: DEMO_USER.name
+          name: DEMO_USER.name,
         };
-        
+
         setUser(userData);
         localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
         setIsLoading(false);
-        
+
         return { success: true };
       } else {
         setIsLoading(false);
-        return { 
-          success: false, 
-          error: 'Invalid email or password. Use demo@medwrangler.com / demo123' 
+        return {
+          success: false,
+          error:
+            "Invalid email or password. Use demo@medwrangler.com / demo123",
         };
       }
     } catch (error) {
       setIsLoading(false);
-      return { 
-        success: false, 
-        error: 'Login failed. Please try again.' 
+      return {
+        success: false,
+        error: "Login failed. Please try again.",
       };
     }
   };
@@ -92,20 +108,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: !!user,
     isLoading,
     login,
-    logout
+    logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

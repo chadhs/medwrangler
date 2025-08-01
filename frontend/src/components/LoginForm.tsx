@@ -1,10 +1,10 @@
-import { useState, FormEvent } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { StatusIndicator } from './StatusIndicator';
+import { useState, FormEvent } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { StatusIndicator } from "./StatusIndicator";
 
 export function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
 
@@ -13,19 +13,19 @@ export function LoginForm() {
     setError(null);
 
     if (!email || !password) {
-      setError('Please enter both email and password');
+      setError("Please enter both email and password");
       return;
     }
 
     const result = await login(email, password);
     if (!result.success) {
-      setError(result.error || 'Login failed');
+      setError(result.error || "Login failed");
     }
   };
 
   const fillDemoCredentials = () => {
-    setEmail('demo@medwrangler.com');
-    setPassword('demo123');
+    setEmail("demo@medwrangler.com");
+    setPassword("demo123");
     setError(null);
   };
 
@@ -80,9 +80,9 @@ export function LoginForm() {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className={`login-button ${isLoading ? 'loading' : ''}`}
+          <button
+            type="submit"
+            className={`login-button ${isLoading ? "loading" : ""}`}
             disabled={isLoading}
           >
             {isLoading ? (
@@ -91,7 +91,7 @@ export function LoginForm() {
                 Signing In...
               </>
             ) : (
-              'Sign In'
+              "Sign In"
             )}
           </button>
         </form>
@@ -100,8 +100,8 @@ export function LoginForm() {
           <div className="divider">
             <span>Demo Access</span>
           </div>
-          
-          <button 
+
+          <button
             type="button"
             onClick={fillDemoCredentials}
             className="demo-button"
@@ -109,17 +109,21 @@ export function LoginForm() {
           >
             🚀 Use Demo Credentials
           </button>
-          
+
           <div className="demo-info">
-            <p><strong>Email:</strong> demo@medwrangler.com</p>
-            <p><strong>Password:</strong> demo123</p>
+            <p>
+              <strong>Email:</strong> demo@medwrangler.com
+            </p>
+            <p>
+              <strong>Password:</strong> demo123
+            </p>
           </div>
         </div>
 
         <div className="login-footer">
           <p>
-            This is a demo version of MedWrangler. Use the demo credentials above 
-            to explore the medication management features.
+            This is a demo version of MedWrangler. Use the demo credentials
+            above to explore the medication management features.
           </p>
         </div>
       </div>
